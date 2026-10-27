@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f5ed">
+  <title>Toxicology data-product evidence explorer</title>
+  <meta name="description" content="A product-level overview of toxicology data resources and documented I1–I3 evidence, with source notes for every status cell.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="eyebrow"><span class="eyebrow-mark"></span> FAIR toxicology · working catalogue</div>
+      <div class="header-main">
+        <div>
+          <h1>Data products &amp; documented impact</h1>
+          <p class="lede">Explore the product-level catalogue. Select an I1–I3 cell to see the underlying evidence and its limitations.</p>
+        </div>
+        <div class="snapshot-card" aria-label="Catalogue snapshot">
+          <span class="snapshot-label">Catalogue snapshot</span>
+          <strong>27 Oct 2026</strong>
+          <span>SQLite schema v35 · read-only</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary-strip" aria-label="Catalogue summary">
+        <div><strong id="product-count">48</strong><span>data products</span></div>
+        <div><strong id="i1-count">24</strong><span>with an I1 example</span></div>
+        <div><strong id="i2-count">29</strong><span>with an I2 example</span></div>
+        <div><strong id="i3-count">12</strong><span>with an I3 example</span></div>
+      </section>
+
+      <section class="guide" aria-labelledby="guide-title">
+        <div>
+          <h2 id="guide-title">How to read this table</h2>
+          <p><strong>I1</strong> downstream integration into a named product · <strong>I2</strong> scholarly reuse of product data · <strong>I3</strong> use in a named assessment, criterion, method update or decision.</p>
+        </div>
+        <div class="legend" aria-label="Evidence status legend">
+          <span><b class="legend-symbol direct">✓</b> Direct example</span>
+          <span><b class="legend-symbol partial">~</b> Partial evidence</span>
+          <span><b class="legend-symbol open">…</b> Search incomplete</span>
+          <span><b class="legend-symbol not-started">?</b> Not searched</span>
+        </div>
+      </section>
+
+      <section class="catalogue-section" aria-labelledby="catalogue-title">
+        <div class="section-head">
+          <div>
+            <h2 id="catalogue-title">Catalogue overview</h2>
+            <p>Hover, focus, or click an impact cell for its evidence record.</p>
+          </div>
+          <span class="shown-count" id="shown-count" aria-live="polite"></span>
+        </div>
+        <div class="controls">
+          <label class="search-control">
+            <span>Search products</span>
+            <input id="product-search" type="search" placeholder="Name, programme, steward…" autocomplete="off">
+          </label>
+          <label class="select-control">
+            <span>Domain</span>
+            <select id="domain-filter"><option value="">All domains</option></select>
+          </label>
+          <label class="select-control">
+            <span>Product type</span>
+            <select id="type-filter"><option value="">All types</option></select>
+          </label>
+        </div>
+        <div class="table-scroll" id="table-scroll">
+          <table id="catalogue-table">
+            <thead>
+              <tr><th scope="col">Product type</th><th scope="col">Data product</th><th scope="col">I1</th><th scope="col">I2</th><th scope="col">I3</th></tr>
+            </thead>
+            <tbody id="catalogue-body"></tbody>
+          </table>
+        </div>
+        <div class="table-footnote">A recorded example is not an impact rate or evidence that FAIR implementation caused reuse. All three systematic searches remain incomplete; no example recorded does not mean no use.</div>
+      </section>
+
+      <footer>
+        <p>This static view is generated from the 48-product SQLite catalogue. Direct examples are pending independent human second review. Product releases and programme-level uses are distinguished in each evidence note.</p>
+      </footer>
+    </main>
+  </div>
+
+  <div id="evidence-popover" class="popover" role="dialog" aria-modal="false" aria-label="Evidence details" hidden>
+    <div class="popover-top"><div id="popover-title"></div><button class="icon-close" id="close-popover" type="button" aria-label="Close evidence details">×</button></div>
+    <div id="popover-content" class="popover-content"></div>
+  </div>
+  <div id="product-dialog" class="product-dialog" role="dialog" aria-modal="true" aria-label="Product details" hidden>
+    <div class="dialog-backdrop" data-close-product></div>
+    <div class="dialog-panel">
+      <button class="icon-close dialog-close" id="close-product" type="button" aria-label="Close product details">×</button>
+      <div id="product-content"></div>
+    </div>
+  </div>
+</body>
+</html>
