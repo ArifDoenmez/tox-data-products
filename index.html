@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f5ed">
+  <meta name="theme-color" content="#ffffff">
   <title>Toxicology data-product evidence explorer</title>
   <meta name="description" content="A product-level overview of toxicology data resources and documented I1–I3 evidence, with source notes for every status cell.">
   <link rel="stylesheet" href="styles.css">
@@ -17,12 +17,12 @@
       <div class="header-main">
         <div>
           <h1>Data products &amp; documented impact</h1>
-          <p class="lede">Explore the product-level catalogue. Select an I1–I3 cell to see the underlying evidence and its limitations.</p>
+          <p class="lede">Explore documented impact and the conditions for data reuse. Select any status cell to inspect its evidence, scope and limitations.</p>
         </div>
         <div class="snapshot-card" aria-label="Catalogue snapshot">
           <span class="snapshot-label">Catalogue snapshot</span>
           <strong>27 Oct 2026</strong>
-          <span>SQLite schema v35 · read-only</span>
+          <span>SQLite schema v36 · read-only</span>
         </div>
       </div>
     </header>
@@ -48,11 +48,27 @@
         </div>
       </section>
 
+      <section class="reuse-overview" aria-labelledby="reuse-title">
+        <h2 id="reuse-title">Evidence for conditions of reuse</h2>
+        <p>Provider documentation supports structured substantive data access for <strong>41/48</strong> products, explicitly applicable reuse conditions for <strong>22/48</strong>, and an identifiable release or dated artifact for <strong>18/48</strong>. These are evidence states, not FAIR scores.</p>
+        <div class="legend" aria-label="Reuse assessment legend">
+          <span><b class="legend-symbol direct">✓</b> Confirmed</span>
+          <span><b class="legend-symbol partial">~</b> Partial support</span>
+          <span><b class="legend-symbol">×</b> Not supported in assessed scope</span>
+          <span><b class="legend-symbol">?</b> Unresolved</span>
+        </div>
+        <p>Specified rights can be restrictive. Partial or unresolved evidence does not mean that a feature is absent. Provider-documentation review; data payloads and API queries were not tested. Independent human second review is pending.</p>
+        <details class="figure-details"><summary>View the overview by domain</summary>
+          <figure><a href="reuse-features.png" target="_blank" rel="noopener"><img src="reuse-features.png" alt="Source support for structured access, specified reuse conditions and identifiable releases, grouped by primary catalogue domain." loading="lazy"></a>
+          <figcaption>Confirmed products / all products in each group. Domain sizes are uneven and several products share programme-level sources; this is not a ranking of domain FAIRness.</figcaption></figure>
+        </details>
+      </section>
+
       <section class="catalogue-section" aria-labelledby="catalogue-title">
         <div class="section-head">
           <div>
             <h2 id="catalogue-title">Catalogue overview</h2>
-            <p>Hover, focus, or click an impact cell for its evidence record.</p>
+            <p>Hover, focus, or click a status cell for its evidence. I1–I3 describe impact; the last three columns describe conditions for reuse.</p>
           </div>
           <span class="shown-count" id="shown-count" aria-live="polite"></span>
         </div>
@@ -73,7 +89,7 @@
         <div class="table-scroll" id="table-scroll">
           <table id="catalogue-table">
             <thead>
-              <tr><th scope="col">Product type</th><th scope="col">Data product</th><th scope="col">I1</th><th scope="col">I2</th><th scope="col">I3</th></tr>
+              <tr><th scope="col">Product type</th><th scope="col">Data product</th><th scope="col">I1</th><th scope="col">I2</th><th scope="col">I3</th><th scope="col">Structured<br>data access</th><th scope="col">Specified<br>reuse rights</th><th scope="col">Identifiable<br>data release</th></tr>
             </thead>
             <tbody id="catalogue-body"></tbody>
           </table>

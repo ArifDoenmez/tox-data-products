@@ -16,6 +16,15 @@
     I1: 'Downstream integration', I2: 'Scholarly data reuse', I3: 'Assessment or decision use',
   };
   const typeNames = { curated_dataset: 'Curated dataset', database: 'Database', knowledgebase: 'Knowledgebase' };
+  const reuseFeatures = new Map(['structured_data', 'specified_rights', 'traceable_release'].map(code => [code, data.reuse_features.find(row => row.code === code)]));
+  const reuseMap = new Map(data.reuse_assessments.map(row => [`${row.resource_id}|${row.feature_code}`, row]));
+  const reuseSources = new Map(data.reuse_sources.map(row => [row.source_key, row]));
+  const reuseStates = {
+    confirmed: { symbol: '✓', label: 'Confirmed', className: 'direct' },
+    partial: { symbol: '~', label: 'Partial support', className: 'partial' },
+    not_supported: { symbol: '×', label: 'Not supported in assessed scope', className: 'not-supported' },
+    unresolved: { symbol: '?', label: 'Unresolved', className: 'unresolved' },
+  };
   const stateInfo = {
     direct: { symbol: '✓', label: 'Direct example recorded', note: 'At least one downstream use is recorded as a direct example for this product. The individual evidence record and any mapping caveat appear below. Independent human second review is still pending where no reviewer is named.' },
     partial: { symbol: '~', label: 'Partial evidence only', note: 'The available evidence is indirect, programme-level, refers to a different release, or does not yet establish use of this exact data product.' },
@@ -115,7 +124,7 @@
       if (!items.length) continue;
       const sectionRow = make('tr', 'domain-row');
       const sectionCell = make('th', '', `${d} · ${items.length}`);
-      sectionCell.colSpan = 5;
+      sectionCell.colSpan = 8;
       sectionCell.scope = 'rowgroup';
       sectionRow.append(sectionCell);
       fragment.append(sectionRow);
@@ -129,12 +138,14 @@
         productButton.addEventListener('click', () => openProduct(product, productButton));
         nameCell.append(productButton);
         row.append(nameCell);
-        for (const ind of ['I1', 'I2', 'I3']) {
+        for (const ind of ['I1', 'I2', 'I3', ...reuseFeatures.keys()]) {
           const cell = make('td');
-          const state = statusFor(product.id, ind);
-          const button = make('button', `impact-button ${state}`, stateInfo[state].symbol);
+          const isReuse = reuseFeatures.has(ind);
+          const state = isReuse ? reuseMap.get(`${product.id}|${ind}`).status : statusFor(product.id, ind);
+          const info = isReuse ? reuseStates[state] : stateInfo[state];
+          const button = make('button', `impact-button ${isReuse ? info.className : state}`, info.symbol);
           button.type = 'button';
-          button.setAttribute('aria-label', `${product.name}, ${ind}: ${stateInfo[state].label}. Show evidence.`);
+          button.setAttribute('aria-label', `${product.name}, ${reuseFeatures.get(ind)?.label || ind}: ${info.label}. Show evidence.`);
           button.setAttribute('aria-haspopup', 'dialog');
           button.setAttribute('aria-controls', 'evidence-popover');
           button.setAttribute('aria-expanded', 'false');
@@ -156,7 +167,7 @@
     if (!filtered.length) {
       const row = make('tr', 'empty-row');
       const cell = make('td', '', 'No products match these filters.');
-      cell.colSpan = 5;
+      cell.colSpan = 8;
       row.append(cell);
       fragment.append(row);
     }
@@ -170,6 +181,7 @@
     return ['other', decision?.replaceAll('_', ' ') || 'Candidate'];
   }
   function renderEvidence(product, indicator) {
+    if (reuseFeatures.has(indicator)) return renderReuseEvidence(product, indicator);
     const key = `${product.id}|${indicator}`;
     const state = statusFor(product.id, indicator);
     const summary = summaryMap.get(key);
@@ -219,6 +231,35 @@
       details.append(ul);
       fragment.append(details);
     }
+    content.replaceChildren(fragment);
+  }
+  function renderReuseEvidence(product, code) {
+    const feature = reuseFeatures.get(code);
+    const assessment = reuseMap.get(`${product.id}|${code}`);
+    document.getElementById('popover-title').replaceChildren(
+      make('strong', '', feature.label), make('span', '', product.name),
+    );
+    const content = document.getElementById('popover-content');
+    const fragment = document.createDocumentFragment();
+    fragment.append(make('p', 'status-note', reuseStates[assessment.status].label));
+    fragment.append(make('p', '', feature.definition));
+    const grid = make('dl', 'detail-grid');
+    detailItem(grid, 'Assessed scope', assessment.scope);
+    detailItem(grid, 'Basis', assessment.basis);
+    detailItem(grid, 'Rights category', assessment.rights_category?.replaceAll('_', ' '));
+    detailItem(grid, 'Assessed release', assessment.release_label);
+    detailItem(grid, 'Checked', assessment.checked_on);
+    fragment.append(grid);
+    const links = data.reuse_links.filter(row => row.resource_id === product.id && row.feature_code === code);
+    for (const link of links) {
+      const source = reuseSources.get(link.source_key);
+      const card = make('article', 'evidence-card');
+      appendLink(card, source.title, source.url);
+      card.append(make('p', 'evidence-meta', `${link.role.replaceAll('_', ' ')} · ${source.source_location} · ${source.checked_on} · ${source.access_state.replaceAll('_', ' ')}`));
+      card.append(make('p', '', source.evidence_summary));
+      fragment.append(card);
+    }
+    fragment.append(make('p', 'caveat', 'Provider documentation and metadata review; no dataset payload or API-query testing. ' + (assessment.second_reviewer ? `Second reviewer: ${assessment.second_reviewer}` : 'Independent human second review pending.')));
     content.replaceChildren(fragment);
   }
   function positionPopover(button) {
@@ -276,9 +317,16 @@
     detailItem(grid, 'Country', product.steward_country);
     detailItem(grid, 'Parent programme', product.parent_programme);
     detailItem(grid, 'Access', product.access_routes);
-    detailItem(grid, 'Verified formats', product.data_formats);
+    detailItem(grid, 'Documented formats', product.data_formats);
     detailItem(grid, 'Version', product.version);
     fragment.append(grid);
+    const reuseSection = make('section', 'detail-section');
+    reuseSection.append(make('h3', '', 'Conditions for reuse · source-based review'));
+    for (const [code, feature] of reuseFeatures) {
+      const assessment = reuseMap.get(`${product.id}|${code}`);
+      reuseSection.append(make('p', '', `${feature.label}: ${reuseStates[assessment.status].label}. ${assessment.basis}`));
+    }
+    fragment.append(reuseSection);
     const sources = sourcesMap.get(product.id) || [];
     const section = make('section', 'detail-section');
     section.append(make('h3', '', `Product sources (${sources.length})`));
