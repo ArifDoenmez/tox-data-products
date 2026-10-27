@@ -303,3 +303,27 @@ thead th {
   background: var(--bg); 
   border-radius: 0;
 }
+
+/* Erzwinge Zeigefinger und Klickbarkeit für alle interaktiven Elemente */
+button, 
+.product-link, 
+.impact-button, 
+a, 
+select, 
+summary {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+/* Verhindere, dass unsichtbare Container oder Backdrops Klicks blockieren, wenn sie versteckt sind */
+.popover[hidden], 
+.product-dialog[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Falls das Backdrop den Klick fängt statt ihn durchzulassen oder zu schließen */
+.dialog-backdrop {
+  pointer-events: auto;
+}
+
